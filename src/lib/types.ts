@@ -94,6 +94,9 @@ export type LeaderboardEntry = {
   name: string;
   avatarSrc: string;
   isCurrentUser?: boolean;
+  ytdEarnings?: number;
+  delta?: number;
+  territory?: string;
 };
 
 export type PeakpathData = {

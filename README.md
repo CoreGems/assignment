@@ -6,7 +6,9 @@
 
 This is my response to the short UI/UX prototype exercise sent as part of the evaluation process. The brief asked for a modern web portal for field / sales / service agents to track incentives, performance, and engagement — scoped to 1–2 responsive screens and roughly 2–3 hours of effort. The full brief is preserved at [`app_requirement.md`](./app_requirement.md).
 
-What I built: **PeakPath**, a two-screen prototype (Dashboard + Program Detail) with a dark cockpit aesthetic, full light theme, and two switchable personas (Alex Chen / Maya Patel). Front-end only, mock data, no backend. Hosted from my local Windows machine via Cloudflare Tunnel so you can click and try it before reading any code.
+What I built: **PeakPath**, a four-screen prototype — **Dashboard**, **Program Detail**, **Leaderboard**, and an in-app **Rules** explainer — with a dark cockpit aesthetic, full light theme, and two switchable personas (Alex Chen / Maya Patel). Front-end only, mock data, no backend. Hosted from my local Windows machine via Cloudflare Tunnel so you can click and try it before reading any code.
+
+> The brief asked for 1–2 screens. Started there, then added the Leaderboard (because the dashboard's rank widget begged for a click-through) and the in-app Rules page (so a non-domain reviewer can orient without leaving the app). Each addition justified itself against the use case rather than being there to pad the submission.
 
 ## Live demo
 
@@ -40,12 +42,17 @@ PeakPath gives a sales rep or field agent a personal view of:
 - **YTD earnings** with year-over-year delta and a 12-month trend sparkline
 - **Monthly goal progress** as an animated ring
 - **Active incentive programs** — each card shows current tier, progress to the next tier, and earned-so-far
-- **Regional rank** with the four neighbors above and below
+- **Regional rank** with the four neighbors above and below (and a click-through to the full leaderboard)
 - **Recent achievement badges** with hover-revealed flavor text
 - **Activity feed** of the most recent events that moved the numbers
-- **Program detail page (the "Quest" view)** with a full tier path, a live **"what if I close N more deals?" projection slider**, weekly trend bar chart, and a milestones timeline
 
-Both screens support switching between **two personas** (Alex Chen / Maya Patel — runtime toggle in settings) and two **themes** (dark / light — segmented control in settings).
+Plus three secondary surfaces:
+
+- **Program detail ("Quest" view)** — full tier path, a live **"what if I close N more deals?" projection slider**, weekly trend bar chart, milestones timeline
+- **Leaderboard** — top-3 podium cards (gold / silver / bronze rank colors) above a 17-row table of the rest of the region, current user highlighted
+- **Rules** — in-app explainer answering "what is this?" for a reviewer who isn't familiar with the SPM/ICM category
+
+Every screen supports switching between **two personas** (Alex Chen / Maya Patel — runtime toggle in settings) and two **themes** (dark / light — segmented control in settings).
 
 ## Design approach
 
@@ -97,10 +104,11 @@ No backend, no API routes, no auth, no analytics. All state in `lib/data.ts` and
 
 To keep the prototype tight while signaling product depth:
 
-- **Leaderboard page** — the nav link is visibly disabled with a "coming soon" tooltip
-- **"View all 23 achievements"** — inert link; the 5 most recent are interactive on the dashboard
+- **"View all 23 achievements"** — inert link; the 5 most recent are interactive on the dashboard, and the rest exist in the data file
+- **Filters on the leaderboard** — single regional view; territory / period filters would be one screen away
+- **Manager / admin perspective** — same data rolled up across direct reports, plus payout-approval flows
 - **Persistence beyond `localStorage`** — slider position resets on reload, no real backend
-- **Notifications, settings beyond theme + persona, profile editing** — out of scope
+- **Notifications, profile editing, settings beyond theme + persona** — out of scope
 
 ## Run locally
 
@@ -116,6 +124,14 @@ npm run build && npm start
 Node 20+ recommended. No environment variables required.
 
 ## How to relaunch the Cloudflare tunnel
+
+The repo ships a one-command launcher that kills anything on port 3000 + any existing cloudflared, then starts both fresh in their own PowerShell windows and prints the public URL:
+
+```powershell
+.\start_app.ps1
+```
+
+Manual two-window equivalent:
 
 ```powershell
 # in one window:
@@ -135,6 +151,8 @@ src/
     layout.tsx              # ThemeProvider + PersonaProvider + TopNav
     page.tsx                # Dashboard
     programs/[id]/page.tsx  # Quest view
+    leaderboard/page.tsx    # Top-3 podium + table of ranks 4–20
+    rules/page.tsx          # In-app explainer
   components/
     nav/                    # top-nav + logo
     settings/               # theme + persona popover
@@ -142,12 +160,14 @@ src/
     program/                # tier-path, projection slider, trend, milestones, stats
     ui/                     # animated-counter (shared)
   lib/
-    data.ts                 # all numbers
+    data.ts                 # all numbers (20-entry leaderboard included)
     copy.ts                 # all visible strings, templated by persona name
     types.ts
     persona-context.tsx
     utils.ts
 public/
-  avatars/                  # DiceBear SVGs (Alex, Maya, 4 leaderboard peers)
+  avatars/                  # 21 DiceBear SVGs (Alex, Maya, 19 leaderboard peers)
 plan/                       # build-plan history (00_PREP through 12_README)
+use-cases/                  # 4 narrative docs for the recruiter
+start_app.ps1               # one-command launcher: kills + restarts server + tunnel
 ```

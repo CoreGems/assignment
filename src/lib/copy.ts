@@ -80,6 +80,22 @@ export const copy = {
     youLabel: "you",
   },
 
+  leaderboard: {
+    pageEyebrow: "Standings",
+    pageTitle: "Leaderboard",
+    pageSubtitle: "West Coast region · Year-to-date earnings · Updated nightly",
+    podiumLabel: "Top of the board",
+    tableHeaderRank: "Rank",
+    tableHeaderName: "Rep",
+    tableHeaderTerritory: "Territory",
+    tableHeaderEarnings: "YTD",
+    tableHeaderDelta: "Last week",
+    deltaUp: (n: number) => `↑ ${n}`,
+    deltaDown: (n: number) => `↓ ${n}`,
+    deltaFlat: "—",
+    youChip: "You",
+  },
+
   achievements: {
     sectionTitle: "Recent badges",
     viewAll: (total: number) => `View all ${total} →`,

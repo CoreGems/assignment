@@ -22,7 +22,8 @@
       "Bash(npm start *)",
       "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:3000/)",
       "Bash(curl *)",
-      "PowerShell(Get-Process *)"
+      "PowerShell(Get-Process *)",
+      "PowerShell(Out-Null *)"
     ]
   }
 }

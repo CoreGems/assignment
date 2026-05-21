@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, ArrowUpRight } from "lucide-react";
+import Link from "next/link";
 import { data } from "@/lib/data";
 import { copy } from "@/lib/copy";
 import { usePersona } from "@/lib/persona-context";
@@ -9,6 +10,10 @@ import { cn } from "@/lib/utils";
 
 export function RankWidget() {
   const { persona } = usePersona();
+  const currentIdx = data.leaderboard.findIndex((e) => e.isCurrentUser);
+  const start = Math.max(0, currentIdx - 2);
+  const slice = data.leaderboard.slice(start, start + 5);
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 12 }}
@@ -16,9 +21,18 @@ export function RankWidget() {
       transition={{ duration: 0.5, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
       className="card-surface p-6 flex flex-col"
     >
-      <h2 className="text-xs uppercase tracking-[0.14em] text-text-muted font-medium mb-3">
-        {copy.rank.sectionTitle}
-      </h2>
+      <div className="flex items-baseline justify-between mb-3">
+        <h2 className="text-xs uppercase tracking-[0.14em] text-text-muted font-medium">
+          {copy.rank.sectionTitle}
+        </h2>
+        <Link
+          href="/leaderboard"
+          className="inline-flex items-center gap-0.5 text-xs text-text-muted hover:text-text-primary transition-colors"
+        >
+          Full board
+          <ArrowUpRight className="w-3 h-3" />
+        </Link>
+      </div>
 
       <div className="flex items-baseline gap-3 mb-4">
         <span className="font-display text-5xl text-brand-gradient tabular-nums leading-none">
@@ -33,7 +47,7 @@ export function RankWidget() {
       <p className="text-xs text-text-muted mb-3">{data.rank.region} region</p>
 
       <ul className="space-y-1.5 mt-auto">
-        {data.leaderboard.map((entry) => {
+        {slice.map((entry) => {
           const isCurrent = entry.isCurrentUser;
           const name = isCurrent ? persona.fullName : entry.name;
           const avatar = isCurrent ? persona.avatarSrc : entry.avatarSrc;

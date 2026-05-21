@@ -28,24 +28,27 @@ The toggle is in settings (segmented control). Not a single sun/moon icon — ex
 
 ## What's intentionally not built
 
-A prototype that tries to do everything looks unfinished. PeakPath shows depth by **gesturing at features without building them**:
+A prototype that tries to do everything looks unfinished. The cuts here are deliberate:
 
-- **Leaderboard** nav link — visibly disabled with "coming soon" tooltip. Signals product depth without an hour of work.
-- **"View all 23 achievements"** — inert link. Most reviewers don't click; the gesture says *"there's more here"*.
-- **Notifications, settings beyond theme + persona, profile editing** — out of scope, not even hinted at.
+- **"View all 23 achievements"** — inert link. The 5 most recent are interactive on the dashboard; the rest exist in `lib/data.ts` and would surface in a real `/achievements` page.
+- **Leaderboard filters** — territory and time-window filters were considered but cut. The current page shows YTD for the West Coast region; adding the filter UI would be one more screen of polish that doesn't change what the prototype proves.
+- **Manager / admin view** — same data rolled up across direct reports, plus payout-approval flows. Out of scope.
+- **Notifications, profile editing, settings beyond theme + persona** — out of scope, not even hinted at.
 
-This is a design discipline: only build what the reviewer will see in two minutes, and gesture at the rest. The cuts are not what the prototype is missing; they're what the prototype is *signaling restraint about*.
+This is a design discipline: build the surfaces where someone will spend time, gesture at the rest in the data and the navigation.
+
+> *(Earlier in the build, the Leaderboard was on this list too — disabled nav link, "coming soon" tooltip. It got promoted to a real page mid-stream because the rank widget on the dashboard begged for a click-through. Worth flagging: this is how scope drifts in a take-home — when each addition can justify itself against the use case.)*
 
 ## What it would become
 
-If this were a real product (not a take-home), the next surfaces to build would be:
+If this were a real product, the next surfaces would be:
 
-1. **A real leaderboard page** — same dark cockpit, but a full regional view with filters (territory, vertical, quarter)
-2. **A manager view** — same data, rolled up across direct reports
+1. **Leaderboard filters + drill-down** — region / territory / quarter; click a row to see that rep's path
+2. **A manager view** — same data, rolled up across direct reports, plus payout-approval flows
 3. **Notifications** — push when a tier is crossed, when a payout clears, when rank changes
 4. **A short voice / chat coach** — *(considered for this take-home, deliberately not built. See [`../APP_AI_EXTENSIONS.md`](../APP_AI_EXTENSIONS.md) for the reasoning — invisible AI as a content tool, not a runtime feature.)*
 
-The current two screens are designed so all four extensions fit without redesigning the brand or the navigation.
+The current four screens are designed so all of the above fit without redesigning the brand or the navigation.
 
 ## Why hosted from a local Windows machine, not Vercel
 
