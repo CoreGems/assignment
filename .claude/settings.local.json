@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(npx --yes create-next-app@latest . --typescript --tailwind --app --src-dir --import-alias \"@/*\" --eslint --use-npm --yes)",
+      "Bash(npx --yes create-next-app@latest _scaffold --typescript --tailwind --app --src-dir --import-alias \"@/*\" --eslint --use-npm --yes)",
+      "Bash(npx --yes create-next-app@latest scaffold-tmp --typescript --tailwind --app --src-dir --import-alias \"@/*\" --eslint --use-npm --yes)",
+      "PowerShell(Move-Item *)",
+      "Bash(npm i *)",
+      "Bash(npm ls *)",
+      "Bash(node -e \"const l = require\\('lucide-react'\\); console.log\\(Object.keys\\(l\\).slice\\(0,5\\)\\)\")",
+      "Bash(npm run *)",
+      "PowerShell(New-Item *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(curl -s -o /dev/null -w \"/ : %{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(curl -s -o /dev/null -w \"/programs/q2-enterprise-renewals : %{http_code}\\\\n\" http://localhost:3000/programs/q2-enterprise-renewals)",
+      "Bash(cloudflared *)",
+      "Bash(taskkill /F /IM node.exe)",
+      "Bash(netstat -ano)",
+      "PowerShell(Get-NetTCPConnection *)",
+      "Bash(npm start *)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(curl *)",
+      "PowerShell(Get-Process *)"
+    ]
+  }
+}

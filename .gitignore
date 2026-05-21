@@ -141,3 +141,6 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Local dev scratch — never shipped (story bible, AI-gen scratch, etc.)
+dev/
