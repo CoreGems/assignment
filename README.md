@@ -16,16 +16,6 @@ What I built: **PeakPath**, a four-screen prototype — **Dashboard**, **Program
 
 > ⚠️ This is a Cloudflare quick tunnel from a local Windows machine. The URL may rotate if the tunnel restarts, and the demo is live only while my machine is awake. If the link is down when you visit, see [Run locally](#run-locally) — the repo builds and runs in under a minute.
 
-## Screenshots
-
-| Dashboard (dark) | Program detail (dark) |
-| --- | --- |
-| _to be added_ | _to be added_ |
-
-| Dashboard (light) | Mobile |
-| --- | --- |
-| _to be added_ | _to be added_ |
-
 ## Use cases — read these next
 
 The fastest way to understand the prototype is to see it through the eyes of the people who'd use it. Four short reads in [`use-cases/`](./use-cases/):
