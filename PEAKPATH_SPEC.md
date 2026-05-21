@@ -12,34 +12,62 @@ Detailed specification for the chosen concept. No code yet. Decisions are stated
 - ✅ "You're $340 from your stretch goal — three more demos closes it."
 - ❌ "Performance metrics indicate proximity to objective threshold."
 
-**Persona we design for:**
-> **Alex Chen** — Regional Sales Rep, West Coast territory. 2 years on the team. Currently #6 on the regional leaderboard. Closes ~14 deals/month. Checks the app between client visits, often one-handed on a phone, sometimes on a laptop at a coffee shop between meetings.
+**Personas (runtime-switchable, see §16):**
 
-Every screen, every number, every empty state assumes Alex. Concrete > generic.
+> **Alex Chen** *(default)* — Regional Sales Rep, West Coast territory. 2 years on the team. Currently #6 on the regional leaderboard. Closes ~14 deals/month. Checks the app between client visits, often one-handed on a phone, sometimes on a laptop at a coffee shop between meetings. Pronouns: he/him.
+
+> **Maya Patel** — Same role, same region, same tenure, same numbers. Pronouns: she/her. Different avatar. Allows the reviewer to flip the persona in settings and see the app speak naturally for either user.
+
+**Data is shared across both personas** — only name, avatar, and pronouns swap. The narrative arc, programs, leaderboard position, and numbers stay identical. This keeps the content workload tractable while making the inclusivity gesture genuine rather than tokenistic.
+
+Every screen, every number, every empty state assumes the active persona. Copy strings template the name and pronouns rather than hardcoding "Alex".
 
 ---
 
 ## 2. Brand system
 
-### 2.1 Color
-**Decision: dark cockpit base.** Light theme not included in v1 (cost vs. value doesn't pay back in 2–3 hours).
+### 2.1 Color — two themes
+
+**Decision:** ship both dark and light, user-switchable in settings (see §16). Dark is the default and the primary design target; light is a careful translation, not a recolor.
+
+**Brand accents (identical across both themes):**
 
 | Token | Hex | Use |
 |---|---|---|
-| `bg-base` | `#0A0A12` | App background — near-black, slight blue cast |
-| `bg-elevated` | `#13131F` | Card base before glass effect |
-| `bg-glass` | `rgba(255,255,255,0.04)` | Glassmorphism card fill |
-| `border-subtle` | `rgba(255,255,255,0.08)` | Hairline card borders |
-| `text-primary` | `#F5F5FA` | Body |
-| `text-muted` | `#8B8B9E` | Secondary labels |
 | `accent-indigo` | `#6366F1` | Primary brand |
 | `accent-magenta` | `#D946EF` | Gradient mid |
 | `accent-coral` | `#FB7185` | Gradient end / celebration |
 | `accent-emerald` | `#10B981` | Positive deltas, success |
 | `accent-amber` | `#F59E0B` | Streak / warning |
 
-**Signature gradient:** `linear-gradient(135deg, #6366F1 0%, #D946EF 50%, #FB7185 100%)`
-Used on: hero number, progress ring stroke, primary CTA, active tier badge, achievement glow.
+**Signature gradient:** `linear-gradient(135deg, #6366F1 0%, #D946EF 50%, #FB7185 100%)` — works on both themes. Used on: hero number, progress ring stroke, primary CTA, active tier badge, achievement glow.
+
+**Dark theme (cockpit):**
+
+| Token | Hex | Use |
+|---|---|---|
+| `bg-base` | `#0A0A12` | App background — near-black, slight blue cast |
+| `bg-elevated` | `#13131F` | Card base before glass effect |
+| `bg-surface` | `rgba(255,255,255,0.04)` | Glassmorphism card fill |
+| `border-subtle` | `rgba(255,255,255,0.08)` | Hairline card borders |
+| `text-primary` | `#F5F5FA` | Body |
+| `text-muted` | `#8B8B9E` | Secondary labels |
+
+**Light theme (daylight):**
+
+| Token | Hex | Use |
+|---|---|---|
+| `bg-base` | `#F7F7FB` | App background — warm off-white with a hint of cool |
+| `bg-elevated` | `#FFFFFF` | Card base |
+| `bg-surface` | `#FFFFFF` | Solid card fill (NO glassmorphism in light theme — see note) |
+| `border-subtle` | `rgba(15,15,30,0.08)` | Hairline card borders |
+| `text-primary` | `#0F0F1E` | Body |
+| `text-muted` | `#6B6B7E` | Secondary labels |
+| `shadow-card` | `0 1px 2px rgba(15,15,30,0.04), 0 8px 24px rgba(15,15,30,0.06)` | Replaces glass depth |
+
+**Important light-theme note:** glassmorphism doesn't translate to light backgrounds — it looks dingy. Light theme uses **solid white cards with soft layered shadows** to convey depth. The cards still have the same border radius (20px), same accent gradients, same animations. The brand reads as continuous; the surface treatment changes.
+
+Implementation: CSS custom properties on `:root` with `[data-theme="light"]` overrides. Tailwind v4 `@theme` block exposes them. `next-themes` handles toggle + persistence + system-preference detection + no-flash hydration.
 
 ### 2.2 Typography
 - **Display / numbers:** Space Grotesk (700, 500) — geometric, slightly mechanical, great for large counters.
@@ -68,7 +96,9 @@ Two screens only. Routing:
 - `/` → Dashboard (Today)
 - `/programs/[id]` → Program detail (Quest view)
 
-Top nav (persistent on both): logo · "Today" · "Programs" · "Leaderboard" (greyed/disabled, signals product depth without building it) · avatar.
+Top nav (persistent on both): logo · "Today" · "Programs" · "Leaderboard" (greyed/disabled, signals product depth without building it) · settings (gear icon) · avatar.
+
+Clicking the gear icon opens the settings dropdown (theme toggle + persona switch — see §16).
 
 ---
 
@@ -208,9 +238,11 @@ A single active program, deeply visualized. We'll feature **"Q2 Enterprise Renew
 
 ---
 
-## 6. Mock data shape
+## 6. Mock data + copy
 
-Single `lib/data.ts` file. Realistic numbers, no `Lorem` anywhere.
+Two files. Realistic numbers, no `Lorem` anywhere. Both are generated offline via the invisible-AI workflow (see §15) using a story bible as context, then hand-edited.
+
+**`lib/data.ts`** — all numeric state and structured records:
 
 ```
 agent = { name, role, region, avatar, rank, rankDelta }
@@ -235,7 +267,20 @@ activity = [{ icon, text, ts }, ...8]
 leaderboardNeighbors = [{ rank, name, avatar }, ...5]
 ```
 
-Numbers tuned so they feel real and tell a story: Alex is mid-pack, on a good streak, one Gold tier away from a noticeable payout bump. Reviewers should sense a narrative.
+Numbers tuned so they feel real and tell a story: Alex is mid-pack, on a good streak, one Gold tier away from a noticeable payout bump. Reviewers should sense a narrative. The story bible (§15) is what keeps the numbers across all 12 months, 6 weeks, 6 programs, and 8 activity entries coherent rather than randomly scattered.
+
+**`lib/copy.ts`** — every visible string in the app, organized by surface:
+
+```
+greetings: { byTimeOfDay: string[], byStreak: string[] }   // rotate per session
+tooltips: { [metricKey]: string }                          // one per metric
+tierDescriptions: { bronze, silver, gold, platinum: string }
+milestoneCelebrations: { onCross: (tier) => string }       // for slider crossing
+emptyStates: { [surface]: string }
+achievementCopy: { [achievementId]: { name, flavor, criteria } }
+```
+
+Hand-edit every string after generation. The LLM gets you 90%; your edits are what makes it not-AI.
 
 ---
 
@@ -287,18 +332,25 @@ No state management library. No CMS. No backend. All data static in `lib/data.ts
 
 ---
 
-## 10. Build order (estimated 2.5 hours)
+## 10. Build order (estimated ~5 hours — superseded by `plan/` files)
 
-1. **0:00–0:15** — Scaffold Next.js, install deps, set up Tailwind tokens + fonts, base layout shell
-2. **0:15–0:30** — Mock data file with realistic numbers
-3. **0:30–1:15** — Dashboard: hero card + ring + signature entrance animation
-4. **1:15–1:40** — Dashboard: programs row, rank widget, achievements, activity feed
-5. **1:40–2:10** — Program detail screen: path viz + projection slider + trend + milestones
-6. **2:10–2:25** — Responsive pass, mobile fixes
-7. **2:25–2:35** — `npm run build && npm start` locally, launch `cloudflared` tunnel, smoke-test the public URL on phone + laptop
-8. **2:35–2:50** — Write `README.md` with design notes (the assignment asks for this) + how to spin the tunnel back up
+> **Note:** As of the §14 + §15 additions (theme switching + persona switching + sequential plan files), this section is a *summary*. The authoritative step-by-step lives in the `plan/` directory at repo root, one file per phase. Use that during execution. The summary below is kept for spec coherence.
 
-**Cuts if running long, in order:** activity feed → achievements row → projection slider → 6-week bar chart. Hero + ring + path viz are non-negotiable.
+1. **0:00–0:10** — Write the **story bible** for Alex (see §15). 1 page of Markdown that frames every subsequent generation. Stays in `dev/` or outside the repo entirely.
+2. **0:10–0:25** — Scaffold Next.js, install deps, set up Tailwind tokens + fonts, base layout shell
+3. **0:25–0:50** — Generate `lib/data.ts` via LLM using the story bible as context. Paste, eyeball every number, hand-tune the 5–10 that feel off.
+4. **0:50–1:35** — Dashboard: hero card + ring + signature entrance animation
+5. **1:35–2:00** — Dashboard: programs row, rank widget, achievements, activity feed. Generate `lib/copy.ts` strings as each surface comes online (tooltips, empty states, achievement names). Hand-edit each.
+6. **2:00–2:30** — Program detail screen: path viz + projection slider + trend + milestones. Generate milestone copy + tier descriptions + slider-crossing celebrations the same way.
+7. **2:30–2:45** — DiceBear avatars wired in for Alex + 5 leaderboard peers. Lucide-icons-in-gradient-circles for badges.
+8. **2:45–3:00** — Responsive pass, mobile fixes
+9. **3:00–3:10** — **Copy editing pass** — read every visible string aloud, rewrite anything that sounds robotic or generic. *This is where invisible AI either lands or doesn't.*
+10. **3:10–3:20** — `npm run build && npm start` locally, launch `cloudflared` tunnel, smoke-test the public URL on phone + laptop
+11. **3:20–3:35** — Write `README.md` with design notes (the assignment asks for this) + how to spin the tunnel back up
+
+**Cuts if running long, in order:** DiceBear avatars (fall back to initials in gradient circles) → achievements row → activity feed → 6-week bar chart. Hero + ring + path viz + projection slider are non-negotiable.
+
+**No cuts on the copy editing pass.** A rushed copy pass undoes the entire invisible-AI strategy.
 
 ---
 
@@ -312,6 +364,10 @@ No state management library. No CMS. No backend. All data static in `lib/data.ts
 - [ ] Favicon + page title set (small detail, big signal)
 - [ ] No console errors, no Lighthouse red flags
 - [ ] Works in latest Chrome, Safari, Firefox
+- [ ] `.env` confirmed gitignored (it already is — see `.gitignore` line 69); `OPENAI_API_KEY` never leaves the local machine
+- [ ] `openai` package NOT in `package.json` (used only at dev time via `npx` or a sibling scratch script — never a runtime dep)
+- [ ] No `app/api/*` route proxies to an LLM; no client code references `OPENAI_API_KEY`
+- [ ] Story bible and any AI-generation scratch scripts excluded from the final repo (or left in `dev/` with `dev/` in `.gitignore`)
 
 ---
 
@@ -369,11 +425,171 @@ A `start-demo.ps1` script at repo root that runs `npm start` and `cloudflared` i
 
 ---
 
-## 13. Open questions for you
+## 13. Invisible-AI content workflow
 
-1. **Persona name** — keep "Alex Chen" or change?
+The running app exposes **no AI surface** — no chat, no synthetic voice, no AI labels, no streaming text, no `openai` runtime dependency. AI is used exclusively as an offline content production tool. The `OPENAI_API_KEY` lives in `.env` (already gitignored at `.gitignore:69`) and is touched only during development.
+
+### 13.1 The story bible
+
+A single 1-page Markdown file (e.g., `dev/story-bible.md`) that frames every subsequent generation. Never shipped. Pasted into the LLM prompt context for every data/copy generation.
+
+Includes:
+- Alex's full persona: role, region, tenure, what they sell, who they sell to
+- Narrative arc across the last 12 months (concretely: "slow March because long-running deal closed but pipeline thinned", "strong April: rebuilt pipeline + landed two renewals", "accelerating May: currently #6, up 2 spots, on track to hit Gold tier in Q2 Enterprise Renewals if they close 3 more deals")
+- Tone guide for all copy ("confident, warm, second-person, never corporate, never patronizing — see §1")
+- Constraints ("never fabricate company names that exist; never use real customer names; numbers must be self-consistent across all surfaces")
+
+Without this, every generation drifts. With it, the dashboard tells one coherent story.
+
+### 13.2 What gets AI-generated, then hand-edited
+
+| Surface | Generated content | Hand-edit pass |
+|---|---|---|
+| `lib/data.ts` — 12-month trend | 12 numbers matching the arc | Tune the dip in March, the May acceleration |
+| `lib/data.ts` — programs (6) | Names, tier thresholds, end dates, payouts | Strip anything that sounds AI-generic ("Synergy Initiative") |
+| `lib/data.ts` — achievements (23) | Names + flavor + criteria | Sharpen the best 5–10, leave others as filler |
+| `lib/data.ts` — activity feed (8) | Specific consequential entries | Verify every entry maps to a real change in the numbers |
+| `lib/data.ts` — leaderboard peers (5) | Diverse plausible names | Cross-check the rank deltas are mathematically possible |
+| `lib/copy.ts` — greetings | 12+ variants by time + streak | Trim anything corny; rotate per session |
+| `lib/copy.ts` — tooltips | One per metric, specific | Verify each says something the number doesn't already say |
+| `lib/copy.ts` — tier descriptions | Bronze/Silver/Gold/Platinum, plain language | Tighten — these are read often |
+| `lib/copy.ts` — milestone celebrations | Slider-crossing copy | Test live; if it reads cheesy, kill it |
+| `lib/copy.ts` — empty states | Per-surface fallback messages | These are easy AI tells — extra editing time |
+| Avatars | DiceBear seeds | DiceBear is algorithmic, not AI — no editing needed |
+| Badges | Lucide icons in gradient circles | No AI involved |
+
+### 13.3 Workflow mechanics
+
+How you'll actually run the generation, given the key is in `.env`:
+
+**Option 1 — sibling scratch script (recommended).** Outside the Next.js project, write a tiny `dev/generate.ts` (or `.mjs`) that reads `.env`, calls the OpenAI SDK, prints output to stdout. You run it, copy-paste the result into `lib/data.ts` or `lib/copy.ts`, hand-edit, commit only the result. The script itself stays in `dev/` and `dev/` is added to `.gitignore`. Keeps `openai` out of `package.json`.
+
+**Option 2 — paste into the LLM chat directly.** Skip the script entirely. Paste the story bible into ChatGPT / Claude desktop / whatever you use, ask for the data structure, copy-paste back. Zero dependency footprint, zero risk of accidental key leak. Slightly slower iteration loop.
+
+**Decision: Option 2** for this assignment. The data + copy volume is small enough that a chat session is faster than writing a script, and it leaves zero AI footprint in the repo even by accident.
+
+### 13.4 The editing pass (non-negotiable)
+
+After all generation is done, before deploy:
+
+1. Open the running app on desktop. Open every surface. Read every visible string aloud.
+2. Anything that sounds like AI, rewrite. Tells include:
+   - Over-balanced sentences ("not just X, but also Y")
+   - Synonyms where the simple word would do ("commence" instead of "start")
+   - Polite hedging ("you might want to consider...")
+   - Inspirational generic-isms ("Your journey to success continues!")
+   - Three-item lists where two would do
+3. Inject specificity wherever possible. "Great work!" → "Your demo→close rate jumped 8% this week."
+4. Inject contractions where a real product would use them. AI defaults to formal; humans say "you're", "it's", "let's".
+
+This pass takes ~10 min and is the entire reason the invisible-AI strategy works.
+
+### 13.5 What not to do (security + tell-prevention recap)
+
+- `openai` package must NOT appear in `package.json` (a reviewer running `cat package.json` is one of the first things that happens)
+- No `app/api/*` route proxies to an LLM
+- No client-side code references `OPENAI_API_KEY` or any model name
+- `dev/` directory gitignored if it contains any AI scripts
+- `.env` already gitignored (`.gitignore:69`); double-check before pushing
+- Set an OpenAI spend cap (~$5) as a safety backstop for the dev session
+
+---
+
+## 14. Settings — theme + persona switching
+
+A small surface, but disproportionately important: it's where the reviewer first interacts with the app, and it's where the inclusivity gesture (persona choice) lives.
+
+### 14.1 Settings dropdown
+
+Triggered by a gear icon in the top nav. Opens as a popover (shadcn `DropdownMenu` or `Popover`). Contents:
+
+```
+┌──────────────────────────────┐
+│  Theme                       │
+│  ○ Dark        ● Light       │  ← segmented control
+├──────────────────────────────┤
+│  Profile                     │
+│  ● Alex Chen   ○ Maya Patel  │  ← segmented control with avatars
+├──────────────────────────────┤
+│  ⓘ Mock data — for demo      │
+└──────────────────────────────┘
+```
+
+Tiny "ⓘ" footer makes it explicit that data is illustrative.
+
+### 14.2 Theme switching
+
+- Library: `next-themes`
+- Default: system preference, falling back to dark
+- Persisted: `localStorage` key `peakpath-theme`
+- No-flash hydration: `next-themes` provides a script that sets the theme before first paint
+- Transition: 200ms cubic-bezier ease on `background-color` + `color` for body and cards. Avoid transitioning border-color (causes flicker on hairlines).
+- Toggle UI: segmented control, not a single toggle — explicit options read better than a sun/moon icon
+
+### 14.3 Persona switching
+
+- State: React context `PersonaProvider` wrapping the app
+- Persisted: `localStorage` key `peakpath-persona` with values `"alex" | "maya"`
+- Default: `"alex"` (no welcome modal — keep it frictionless)
+- What changes on switch:
+  - Display name in greetings, activity feed, tooltips
+  - Pronouns where copy uses them
+  - Avatar (DiceBear seed swap)
+  - That's it — every number stays the same
+- Implementation: copy strings are templated, e.g., `` `Good morning, ${persona.firstName}` ``, never hardcoded
+- Animation on switch: subtle 300ms fade on the avatar and greeting line. No jarring full-page re-render.
+
+### 14.4 Why no "welcome modal" to pick persona on first visit
+
+Considered and rejected. A modal in front of the dashboard delays the visual payoff (the hero entrance animation) and adds a step the reviewer didn't ask for. Default to Alex, make Maya one click away. Same inclusivity signal, better first impression.
+
+### 14.5 Avatar generation
+
+DiceBear `avataaars-neutral` or `personas` style with deterministic seeds:
+- Alex: seed `alex-chen-peakpath`
+- Maya: seed `maya-patel-peakpath`
+- Leaderboard peers: seeded by name
+
+Generated client-side via the DiceBear HTTP API or pre-downloaded as SVGs in `/public/avatars/`. Decision: **pre-download as SVGs** — avoids a network call on every render and keeps the app working offline.
+
+---
+
+## 15. Build plan — sequential files
+
+Detailed step-by-step execution plan lives in the `plan/` directory at repo root, broken into one Markdown file per phase. The phases are designed to be picked up and executed independently — each file states its prerequisites, tasks, definition of done, and what comes next.
+
+```
+plan/
+  00_PREP.md                — story bible + locked decisions
+  01_SCAFFOLD.md            — Next.js + Tailwind + shadcn + fonts
+  02_DATA_AND_COPY.md       — generate lib/data.ts + lib/copy.ts
+  03_LAYOUT_SHELL.md        — nav, theme provider, persona context
+  04_DASHBOARD_HERO.md      — hero card + ring + signature entrance
+  05_DASHBOARD_REST.md      — programs row + rank + achievements + activity
+  06_PROGRAM_DETAIL.md      — path viz + projection slider + trend + milestones
+  07_SETTINGS.md            — theme switcher + persona toggle + dropdown UI
+  08_LIGHT_THEME_POLISH.md  — light-mode card treatments + visual QA both modes
+  09_RESPONSIVE.md          — mobile + tablet breakpoint pass
+  10_COPY_EDITING_PASS.md   — non-negotiable polish step
+  11_DEPLOY_AND_TUNNEL.md   — build, cloudflared, smoke test
+  12_README_AND_SUBMIT.md   — README + screenshots + screen recording
+```
+
+**Revised total estimate: ~5 hours.** This exceeds the original 2–3 hr brief by ~2 hr, driven by:
+- Light theme parity (+45 min vs. dark-only)
+- Settings UI + persona switching (+45 min vs. single persona)
+- Invisible-AI content workflow (+60 min vs. hand-written placeholders)
+
+Cuts that get it back to ~4 hr if needed (in order): activity feed (-15), 6-week bar chart on detail page (-15), DiceBear avatars (use initials in gradient circles, -15), Maya persona (-30, defeats the point but it's the biggest single cut).
+
+---
+
+## 16. Open questions for you
+
+1. ~~**Persona name**~~ — **Resolved.** Alex Chen + Maya Patel, runtime-switchable (§14).
 2. **Featured program name** — "Q2 Enterprise Renewals" or something more specific to a real industry vertical (SaaS, insurance, retail, telecom)?
 3. **Submission target** — is there a specific company/role this is going to? That might shift accent color or vertical-specific copy.
-4. **Repo + Vercel** — is the GitHub repo for this assignment already set up, or do I create one when the time comes?
+4. **Repo + tunnel** — is the GitHub repo for this assignment already set up, or do I create one when the time comes? (Cloudflare tunnel approach already locked, see §12.)
+5. **Maya Patel** — happy with that name, or want to substitute another? Easy to swap before content generation starts.
 
-Answer those when you're ready and I'll incorporate them, then we move to build.
+Answer those when you're ready and I'll incorporate them, then we start working through `plan/00_PREP.md`.
