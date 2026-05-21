@@ -42,6 +42,7 @@ export const copy = {
   nav: {
     today: "Today",
     programs: "Programs",
+    rules: "Rules",
     leaderboard: "Leaderboard",
     leaderboardDisabled: "Leaderboard view — coming soon",
     settings: "Settings",

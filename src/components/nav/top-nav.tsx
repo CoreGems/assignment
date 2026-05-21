@@ -21,6 +21,7 @@ export function TopNav() {
 
   const isTodayActive = pathname === "/";
   const isProgramsActive = pathname.startsWith("/programs");
+  const isRulesActive = pathname === "/rules";
 
   return (
     <header className="sticky top-0 z-30 backdrop-blur-md bg-bg-base/70 border-b border-border-subtle">
@@ -43,6 +44,9 @@ export function TopNav() {
               className={linkClass(isProgramsActive)}
             >
               {copy.nav.programs}
+            </Link>
+            <Link href="/rules" className={linkClass(isRulesActive)}>
+              {copy.nav.rules}
             </Link>
             <span
               className="px-3 py-1.5 rounded-full text-sm font-medium text-text-muted/60 cursor-not-allowed"
