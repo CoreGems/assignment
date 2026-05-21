@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
 import { usePersona } from "@/lib/persona-context";
 import { copy } from "@/lib/copy";
 import { SettingsMenu } from "@/components/settings/settings-menu";
@@ -60,13 +61,19 @@ export function TopNav() {
 
         <div className="flex items-center gap-2">
           <SettingsMenu />
-          <div className="h-9 w-9 rounded-full overflow-hidden border border-border-subtle bg-bg-elevated">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={persona.avatarSrc}
-              alt={persona.fullName}
-              className="w-full h-full object-cover"
-            />
+          <div className="h-9 w-9 rounded-full overflow-hidden border border-border-subtle bg-bg-elevated relative">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.img
+                key={persona.id}
+                src={persona.avatarSrc}
+                alt={persona.fullName}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            </AnimatePresence>
           </div>
         </div>
       </div>

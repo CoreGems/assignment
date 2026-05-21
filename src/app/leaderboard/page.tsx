@@ -1,7 +1,17 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Crown, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import {
+  Crown,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  MapPin,
+  Check,
+  X,
+} from "lucide-react";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { useMemo, useState } from "react";
 import { data } from "@/lib/data";
 import { copy } from "@/lib/copy";
 import { usePersona } from "@/lib/persona-context";
@@ -20,6 +30,25 @@ export default function LeaderboardPage() {
   const all = data.leaderboard;
   const top3 = all.slice(0, 3);
   const rest = all.slice(3);
+
+  const [territory, setTerritory] = useState<string | null>(null);
+
+  const territories = useMemo(() => {
+    const set = new Set<string>();
+    for (const e of all) if (e.territory) set.add(e.territory);
+    return Array.from(set).sort();
+  }, [all]);
+
+  const territoryCounts = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const e of all) if (e.territory) m.set(e.territory, (m.get(e.territory) ?? 0) + 1);
+    return m;
+  }, [all]);
+
+  const filteredRest = useMemo(
+    () => (territory ? rest.filter((e) => e.territory === territory) : rest),
+    [rest, territory],
+  );
 
   function display(e: LeaderboardEntry) {
     return {
@@ -79,11 +108,28 @@ export default function LeaderboardPage() {
         </div>
       </motion.section>
 
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+        className="flex items-center justify-between gap-3 flex-wrap"
+      >
+        <h2 className="text-xs uppercase tracking-[0.14em] text-text-muted font-medium">
+          Ranks 4 — {all.length}
+        </h2>
+        <TerritoryFilter
+          value={territory}
+          onChange={setTerritory}
+          options={territories}
+          counts={territoryCounts}
+        />
+      </motion.div>
+
       <motion.section
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-        className="card-surface overflow-hidden"
+        className="card-surface overflow-hidden -mt-6"
       >
         {/* Header row */}
         <div className="hidden sm:grid grid-cols-[3rem_2.5rem_1fr_8rem_5rem_5rem] items-center gap-3 px-5 py-3 border-b border-border-subtle text-[11px] uppercase tracking-[0.12em] text-text-muted font-medium">
@@ -100,7 +146,13 @@ export default function LeaderboardPage() {
         </div>
 
         <ul>
-          {rest.map((entry) => {
+          {filteredRest.length === 0 && (
+            <li className="px-5 py-8 text-center text-sm text-text-muted">
+              No reps in <span className="text-text-primary">{territory}</span> below
+              the top 3. Try clearing the filter.
+            </li>
+          )}
+          {filteredRest.map((entry) => {
             const d = display(entry);
             return (
               <LeaderboardRow
@@ -240,6 +292,89 @@ function LeaderboardRow({
         <DeltaChip value={delta} />
       </div>
     </li>
+  );
+}
+
+function TerritoryFilter({
+  value,
+  options,
+  counts,
+  onChange,
+}: {
+  value: string | null;
+  options: string[];
+  counts: Map<string, number>;
+  onChange: (v: string | null) => void;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger asChild>
+          <button
+            className={cn(
+              "inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium transition-colors",
+              value
+                ? "bg-accent-magenta/10 border-accent-magenta/30 text-text-primary"
+                : "bg-bg-surface border-border-subtle text-text-muted hover:text-text-primary",
+            )}
+          >
+            <MapPin className="w-3.5 h-3.5" />
+            {value ?? "All territories"}
+          </button>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Portal>
+          <DropdownMenu.Content
+            sideOffset={8}
+            align="end"
+            className="card-surface p-1.5 z-50 min-w-[200px] max-h-[60vh] overflow-y-auto"
+          >
+            <DropdownMenu.Item
+              onSelect={() => onChange(null)}
+              className={cn(
+                "flex items-center justify-between gap-3 px-3 py-2 rounded-md text-sm cursor-pointer outline-none",
+                "text-text-primary hover:bg-bg-surface focus:bg-bg-surface",
+              )}
+            >
+              <span>All territories</span>
+              {!value && <Check className="w-3.5 h-3.5 text-accent-magenta" />}
+            </DropdownMenu.Item>
+            <div className="h-px bg-border-subtle my-1" />
+            {options.map((t) => (
+              <DropdownMenu.Item
+                key={t}
+                onSelect={() => onChange(t)}
+                className={cn(
+                  "flex items-center justify-between gap-3 px-3 py-2 rounded-md text-sm cursor-pointer outline-none",
+                  "text-text-primary hover:bg-bg-surface focus:bg-bg-surface",
+                )}
+              >
+                <span className="flex items-center gap-2">
+                  {t}
+                  <span className="text-[10px] text-text-muted tabular-nums">
+                    {counts.get(t)}
+                  </span>
+                </span>
+                {value === t && (
+                  <Check className="w-3.5 h-3.5 text-accent-magenta" />
+                )}
+              </DropdownMenu.Item>
+            ))}
+          </DropdownMenu.Content>
+        </DropdownMenu.Portal>
+      </DropdownMenu.Root>
+
+      {value && (
+        <button
+          type="button"
+          onClick={() => onChange(null)}
+          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs text-text-muted hover:text-text-primary transition-colors"
+          aria-label="Clear filter"
+        >
+          <X className="w-3 h-3" />
+          Clear
+        </button>
+      )}
+    </div>
   );
 }
 

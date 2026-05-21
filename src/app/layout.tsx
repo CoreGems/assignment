@@ -3,6 +3,7 @@ import { Space_Grotesk, Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { TopNav } from "@/components/nav/top-nav";
+import { BottomNav } from "@/components/nav/bottom-nav";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-display",
@@ -36,9 +37,10 @@ export default function RootLayout({
       <body className="min-h-full">
         <Providers>
           <TopNav />
-          <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-8 pb-20">
+          <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-8 pb-24 md:pb-20">
             {children}
           </main>
+          <BottomNav />
         </Providers>
       </body>
     </html>

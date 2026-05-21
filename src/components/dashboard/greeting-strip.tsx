@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Flame } from "lucide-react";
 import { usePersona } from "@/lib/persona-context";
 import { pickGreeting, copy } from "@/lib/copy";
@@ -38,9 +38,18 @@ export function GreetingStrip() {
       className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6"
     >
       <div className="flex items-center gap-3 flex-wrap">
-        <h1 className="font-display text-2xl sm:text-3xl text-text-primary tracking-tight">
-          {greeting}
-        </h1>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.h1
+            key={persona.id}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            className="font-display text-2xl sm:text-3xl text-text-primary tracking-tight"
+          >
+            {greeting}
+          </motion.h1>
+        </AnimatePresence>
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border border-accent-amber/40 text-accent-amber bg-accent-amber/10">
           <Flame className="w-3.5 h-3.5" />
           {copy.hero.streakLabel(data.streak.weeks)}
